@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "sources": ["../src/index.js"],
+  "names": ["Celebrate", "ReactDOM", "render", "document", "getElementById"],
+  "mappings": "AAAA,MAAMA,SAAS,GAAG,MAAM;AACtB,sBAAO,oFAAP;AACD,CAFD;;AAIAC,QAAQ,CAACC,MAAT,eACE,oBAAC,SAAD,OADF,EAEEC,QAAQ,CAACC,cAAT,CAAwB,MAAxB,CAFF",
+  "sourcesContent": [
+    "const Celebrate = () => {\n  return <p>It's working! </p>;\n};\n\nReactDOM.render(\n  <Celebrate />,\n  document.getElementById('root'),\n);"
+  ]
+}
