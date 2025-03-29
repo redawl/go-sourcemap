@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/redawl/sourcemap-decoder/sourcemap"
+	"github.com/redawl/go-sourcemap/sourcemap/spec"
 )
 
 func main() {
@@ -52,14 +52,14 @@ func main() {
             body = string(bodyBytes)
         }
 
-        decoded, err := sourcemap.ParseSourceMap(string(body), *url)
+        decoded, err := spec.ParseSourceMap(string(body), *url)
         
-        if false {
-            if err != nil {
-                slog.Error("Error parsing source map", "error", err)
-                os.Exit(-1)
-            }
+        if err != nil {
+            slog.Error("Error parsing source map", "error", err)
+            os.Exit(-1)
+        }
 
+        if false {
             err = os.MkdirAll(*generateDirectory, 0700)
 
             if err != nil {

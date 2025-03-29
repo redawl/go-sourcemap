@@ -1,3 +1,3 @@
-module github.com/redawl/sourcemap-decoder
+module github.com/redawl/go-sourcemap
 
 go 1.24.1

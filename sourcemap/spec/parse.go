@@ -1,4 +1,4 @@
-package sourcemap
+package spec
 
 import (
 	"encoding/json"
@@ -65,8 +65,8 @@ func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRec
     }, nil
 }
 
-func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string, sourcesContent []string, ignoreList []int) ([]*SourceRecord, error) {
-    decodedSources := make([]*SourceRecord, len(sources))
+func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string, sourcesContent []string, ignoreList []int) ([]*DecodedSourceRecord, error) {
+    decodedSources := make([]*DecodedSourceRecord, len(sources))
 
     sourcesContentCount := len(sourcesContent)
 
@@ -83,7 +83,7 @@ func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string,
     }
 
     for index, source := range sources {
-        decodedSource := &SourceRecord{
+        decodedSource := &DecodedSourceRecord{
             Ignored: false,
         }
 
@@ -105,7 +105,7 @@ func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string,
     return decodedSources, nil
 }
 
-func DecodeMappings(mappings string, names []string, sources []*SourceRecord) ([]*DecodedMappingRecord, error) {
+func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRecord) ([]*DecodedMappingRecord, error) {
     err := ValidateBase64VLQGroupings(mappings)
 
     if err != nil {
@@ -211,7 +211,9 @@ func DecodeMappings(mappings string, names []string, sources []*SourceRecord) ([
 }
 
 func ValidateBase64VLQGroupings(groupings string) error {
-    if strings.ContainsAny(groupings, "")  {
+    if strings.ContainsFunc(groupings, func(r rune) bool {
+        return !strings.ContainsRune("+,/;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", r)
+    })  {
         return fmt.Errorf("Error: groupings contains invalid chars: %s", groupings)
     }
 
