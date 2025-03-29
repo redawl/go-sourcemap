@@ -33,6 +33,7 @@ type DecodedSourceRecord struct {
     Ignored bool    `json:"ignored"`
 }
 
+// DecodedMappingRecord represents 
 type DecodedMappingRecord struct {
     GeneratedLine int            `json:"generatedLine"`
     GeneratedColumn int          `json:"generatedColumn"`
@@ -44,7 +45,7 @@ type DecodedMappingRecord struct {
 
 type DecodedSourceMapRecord struct {
     File string                      `json:"file"`
-    Sources []*DecodedSourceRecord          `json:"sources"`
+    Sources []*DecodedSourceRecord   `json:"sources"`
     Mappings []*DecodedMappingRecord `json:"mappings"`
 }
 

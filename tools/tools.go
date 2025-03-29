@@ -7,12 +7,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/redawl/go-sourcemap/sourcemap/spec"
+	"github.com/redawl/go-sourcemap/spec"
 )
 
 // Parse functions
 
-
+// ParseSourceMapFromUrl
+// TODO: Docs
 func ParseSourceMapFromUrl(url string) (*spec.DecodedSourceMapRecord, error) {
     response, err := http.Get(url)
 
@@ -27,7 +28,7 @@ func ParseSourceMapFromUrl(url string) (*spec.DecodedSourceMapRecord, error) {
     contents, err := io.ReadAll(response.Body)
 
     if err != nil {
-        return nil, fmt.Errorf("Error reading response body: %s", err.Error())
+        return nil, fmt.Errorf("Error reading response body: %v", err)
     }
 
     return spec.ParseSourceMap(string(contents), url)
@@ -35,11 +36,13 @@ func ParseSourceMapFromUrl(url string) (*spec.DecodedSourceMapRecord, error) {
 
 // Save functions
 
+// SaveSourcesToDirectory
+// TODO: Docs
 func SaveSourcesToDirectory(mapRecord *spec.DecodedSourceMapRecord, dir string) error {
     err := os.MkdirAll(dir, 0700)
 
     if err != nil {
-        return fmt.Errorf("Error creating %s: %s", dir, err.Error())
+        return fmt.Errorf("Error creating %s: %v", dir, err)
     }
 
     for _, source := range mapRecord.Sources {
@@ -49,13 +52,13 @@ func SaveSourcesToDirectory(mapRecord *spec.DecodedSourceMapRecord, dir string) 
             err = os.MkdirAll(dir + source.Url[:index], 0700)
 
             if err != nil {
-                return fmt.Errorf("Error creating %s: %s", dir + source.Url[:index], err.Error())
+                return fmt.Errorf("Error creating %s: %v", dir + source.Url[:index], err)
             }
 
             err := os.WriteFile(dir + source.Url, []byte(source.Content), 0600)
 
             if err != nil {
-                return fmt.Errorf("Error writing file contents to %s: %s", dir + source.Url, err.Error())
+                return fmt.Errorf("Error writing file contents to %s: %v", dir + source.Url, err)
             }
         }
     }

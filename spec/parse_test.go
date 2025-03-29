@@ -11,7 +11,7 @@ var testFiles = []string{
 }
 
 func getTestFileContents(filename string) (string, error) {
-    contents, err := os.ReadFile("../../testdata/" + filename)
+    contents, err := os.ReadFile("../testdata/" + filename)
     
     if err != nil {
         return "", err
@@ -26,14 +26,14 @@ func TestParseSourceMap(t *testing.T) {
             contents, err := getTestFileContents(testFile) 
 
             if err != nil {
-                t.Errorf("Error getting contents of %s: %s", testFile, err.Error())
+                t.Errorf("Error getting contents of %s: %v", testFile, err)
                 return
             }
 
             _, err = ParseSourceMap(contents, "")
 
             if err != nil {
-                t.Errorf("Error parsing %s: %s", testFile, err.Error())
+                t.Errorf("Error parsing %s: %v", testFile, err)
             }
         })
     }
