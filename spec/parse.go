@@ -1,3 +1,6 @@
+// Package spec contains Objects and implementations of the abstract methods defined in [Draft ECMA-426].
+//
+// [Draft ECMA-426]: https://tc39.es/ecma426/
 package spec
 
 import (
@@ -12,6 +15,10 @@ import (
 // ParseSourceMap parses str into a DecodedSourceMapRecord
 // Returns an error if parsing was not successfull
 // TODO: Support sourcemaps with the optional "sections" extension
+//
+// [Source map format specification]
+// 
+// [Source map format specification]: https://tc39.es/ecma426/#sec-ParseSourceMap
 func ParseSourceMap(str string, baseURL string) (*DecodedSourceMapRecord, error) {
     sourceMap, err := ParseJSON(str)
 
@@ -26,6 +33,10 @@ func ParseSourceMap(str string, baseURL string) (*DecodedSourceMapRecord, error)
 
 // ParseJSON parses str into a SourceMap object.
 // Returns error if str is not valid json, or if the json object is not a SourceMap
+//
+// [Source map format specification]
+//
+// [Source map format specification]: https://tc39.es/ecma426/#sec-ParseJSON
 func ParseJSON(str string) (*SourceMap, error) {
     decoder := json.NewDecoder(strings.NewReader(str))
 
@@ -41,6 +52,10 @@ func ParseJSON(str string) (*SourceMap, error) {
 }
 
 // DecodeSourceMap decodes sourceMap into a DecodedSourceMapRecord
+//
+// [Source map format specification]
+//
+// [Source map format specification]: https://tc39.es/ecma426/#sec-DecodeSourceMap
 func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRecord, error) {
     if sourceMap.Version != 3 {
         slog.Warn("Version was not 3, parsing may fail", "version", sourceMap.Version)
@@ -64,7 +79,11 @@ func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRec
         Mappings: mappings,
     }, nil
 }
-
+// DecodeSourceMapSources
+//
+// [Source map format specification]
+//
+// [Source map format specification]: https://tc39.es/ecma426/#sec-DecodeSourceMapSources
 func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string, sourcesContent []string, ignoreList []int) ([]*DecodedSourceRecord, error) {
     decodedSources := make([]*DecodedSourceRecord, len(sources))
 
@@ -73,8 +92,8 @@ func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string,
     var sourceUrlPrefix string
 
     if sourceRoot != "" {
-        if strings.Contains(sourceRoot, "\x2F") {
-            idx := strings.Index(sourceRoot, "\x2F") 
+        if strings.Contains(sourceRoot, "/") {
+            idx := strings.Index(sourceRoot, "/") 
 
             sourceUrlPrefix = sourceRoot[0:idx+1]
         } else {
@@ -105,6 +124,11 @@ func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string,
     return decodedSources, nil
 }
 
+// DecodeMappings 
+// 
+// [Source map format specification]
+//
+// [Source map format specification]: https://tc39.es/ecma426/#sec-DecodeMappings
 func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRecord) ([]*DecodedMappingRecord, error) {
     err := ValidateBase64VLQGroupings(mappings)
 
@@ -210,6 +234,11 @@ func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRec
     return decodedMappings, nil
 }
 
+// ValidateBase64VLQGroupings 
+//
+// [Source map format specification]
+//
+// [Source map format specification]: https://tc39.es/ecma426/#sec-ValidateBase64VLQGroupings
 func ValidateBase64VLQGroupings(groupings string) error {
     if strings.ContainsFunc(groupings, func(r rune) bool {
         return !strings.ContainsRune("+,/;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", r)
@@ -220,6 +249,12 @@ func ValidateBase64VLQGroupings(groupings string) error {
     return nil 
 }
 
+// DecodeBase64VLQ attempts to base64VLQ decode the char in segment at position,
+// and returns the int value of the decoded char.
+// 
+// [Source map format specification]
+//
+// [Source map format specification]: https://tc39.es/ecma426/#sec-DecodeBase64VLQ
 func DecodeBase64VLQ(segment string, position *int) (int, error) {
     segmentLen := len(segment)
     if int(*position) == segmentLen {
@@ -252,7 +287,7 @@ func DecodeBase64VLQ(segment string, position *int) (int, error) {
 
     for currentByte / 32 == 1 {
         if *position == segmentLen {
-            return -1, fmt.Errorf("Error: position == segmentLen => %d == %d", *position, segmentLen)
+            return -1, fmt.Errorf("Error: position == segmentLen: %d", segmentLen)
         }
 
         currentByte, err = ConsumeBase64ValueAt(segment, position)
@@ -280,11 +315,16 @@ func DecodeBase64VLQ(segment string, position *int) (int, error) {
 }
 
 // ConsumeBase64ValueAt attempts to base64 decode the char at position, and if successful returns the int value of the decoded char. 
-// Returns an error if position is out of bounds of str, or if the char at position is not a valid base64 char
+// Returns an error if position is out of bounds of str, or if the char at position is not a valid base64 char.
+// If decoding of the char is successful, position is incremented.
+//
+// [Source map format specification]
+//
+// [Source map format specification]: https://tc39.es/ecma426/#ConsumeBase64ValueAt
 func ConsumeBase64ValueAt(str string, position *int) (int, error) {
     alph := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-    if int(*position) >= len(str) {
+    if *position >= len(str) {
         return -1, fmt.Errorf("Position was out of bounds of str!")
     }
 

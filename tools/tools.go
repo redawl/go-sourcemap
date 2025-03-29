@@ -1,4 +1,6 @@
-package sourcemap
+// Package tools contains miscellaneous utilities for using the sourcemap implementation in package spec.
+// These tools are not part of the spec, and are included for convenience.
+package tools
 
 import (
 	"fmt"
