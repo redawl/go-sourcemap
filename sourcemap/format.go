@@ -8,8 +8,8 @@ type SourceMap struct {
     SourcesContent []string `json:"sourcesContent"`      // original mapped sources contents
     Names []string          `json:"names"`               // optional, symbol names which can be used by mappings field
     Mappings string         `json:"mappings"`            // Encoded mapping data
-    IgnoreList []uint        `json:"ingoreList"`          // optional, list of indices that should be considered third-party code
-    XGoogleIgnoreList []uint `json:"x_google_ignoreList"` // Deprecated, only checked if ignoreList is not present
+    IgnoreList []int        `json:"ingoreList"`          // optional, list of indices that should be considered third-party code
+    XGoogleIgnoreList []int `json:"x_google_ignoreList"` // Deprecated, only checked if ignoreList is not present
 }
 
 type SourceRecord struct {
@@ -19,11 +19,11 @@ type SourceRecord struct {
 }
 
 type DecodedMappingRecord struct {
-    GeneratedLine uint
-    GeneratedColumn uint
+    GeneratedLine int
+    GeneratedColumn int
     OriginalSource *SourceRecord
-    OriginalLine uint
-    OriginalColumn uint
+    OriginalLine int
+    OriginalColumn int
     Name string
 }
 

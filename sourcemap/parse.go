@@ -4,10 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"math"
 	"slices"
 	"strings"
 )
 
+// ParseSourceMap parses str into a DecodedSourceMapRecord
+// Returns an error if parsing was not successfull
+// TODO: Support sourcemaps with the optional "sections" extension
 func ParseSourceMap(str string, baseURL string) (*DecodedSourceMapRecord, error) {
     sourceMap, err := ParseJSON(str)
 
@@ -15,11 +19,13 @@ func ParseSourceMap(str string, baseURL string) (*DecodedSourceMapRecord, error)
         return nil, fmt.Errorf("Error parsing str: %s", err.Error())
     }
 
-    // TODO: call DecodeIndexSourceMap(sourceMap, baseURL) here
+    // TODO: call DecodeIndexSourceMap(sourceMap, baseURL) here if "sections" exists
 
     return DecodeSourceMap(sourceMap, baseURL)
 }
 
+// ParseJSON parses str into a SourceMap object.
+// Returns error if str is not valid json, or if the json object is not a SourceMap
 func ParseJSON(str string) (*SourceMap, error) {
     decoder := json.NewDecoder(strings.NewReader(str))
 
@@ -34,6 +40,7 @@ func ParseJSON(str string) (*SourceMap, error) {
     return sourceMap, nil
 }
 
+// DecodeSourceMap decodes sourceMap into a DecodedSourceMapRecord
 func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRecord, error) {
     if sourceMap.Version != 3 {
         slog.Warn("Version was not 3, parsing may fail", "version", sourceMap.Version)
@@ -58,7 +65,7 @@ func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRec
     }, nil
 }
 
-func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string, sourcesContent []string, ignoreList []uint) ([]*SourceRecord, error) {
+func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string, sourcesContent []string, ignoreList []int) ([]*SourceRecord, error) {
     decodedSources := make([]*SourceRecord, len(sources))
 
     sourcesContentCount := len(sourcesContent)
@@ -84,7 +91,7 @@ func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string,
             decodedSource.Url = baseURL + sourceUrlPrefix + source
         }
 
-        if slices.Contains(ignoreList, uint(index)) {
+        if slices.Contains(ignoreList, index) {
             decodedSource.Ignored = true 
         }
 
@@ -121,21 +128,20 @@ func DecodeMappings(mappings string, names []string, sources []*SourceRecord) ([
 
             generatedColumn := 0
             for _, segment := range(segments) {
-                position := uint(0)
-                // TODO: position needs to be a reference so that its value can be updated with each call to DecodeBase64VLQ
+                position := 0
                 relativeGeneratedColumn, err := DecodeBase64VLQ(segment, &position)
 
                 if err != nil {
                     return nil, fmt.Errorf("Error decoding base64 VLQ: %s", err.Error())
                 } else {
-                    generatedColumn = generatedColumn + relativeGeneratedColumn
+                    generatedColumn += relativeGeneratedColumn
 
                     if generatedColumn < 0 {
                         slog.Error("Error: generatedColumn was less than 0", "generatedColumn", 0)
                     } else {
                         decodedMapping := &DecodedMappingRecord{
-                            GeneratedLine: uint(generatedLine),
-                            GeneratedColumn: uint(generatedColumn),
+                            GeneratedLine: generatedLine,
+                            GeneratedColumn: generatedColumn,
                         }
 
                         decodedMappings = append(decodedMappings, decodedMapping)
@@ -158,9 +164,9 @@ func DecodeMappings(mappings string, names []string, sources []*SourceRecord) ([
                             return nil, fmt.Errorf("Error decoding base64 VLQ: %s", err.Error())
                         }
                         
-                        if relativeOriginalColumn == -1 && relativeSourceIndex != -1 {
+                        if relativeOriginalColumn == math.MaxInt && relativeSourceIndex != math.MaxInt {
                             slog.Error("Error: relativeOriginalColumn was -1 when relativeSourceIndex was not -1", "relativeSourceIndex", relativeSourceIndex)
-                        } else if relativeOriginalColumn != -1 {
+                        } else if relativeOriginalColumn != math.MaxInt {
                             sourceIndex += relativeSourceIndex
                             originalLine += relativeOriginalLine
                             originalColumn += relativeOriginalColumn
@@ -170,8 +176,8 @@ func DecodeMappings(mappings string, names []string, sources []*SourceRecord) ([
                                  slog.Error("Error: an index was less than zero, or sourceIndex >= len(sources)", "sourceIndex", sourceIndex, "originalLine", originalLine, "originalColumn", originalColumn, "len(sources)", len(sources))
                             } else {
                                 decodedMapping.OriginalSource = sources[sourceIndex]
-                                decodedMapping.OriginalLine = uint(originalLine)
-                                decodedMapping.OriginalColumn = uint(originalColumn) 
+                                decodedMapping.OriginalLine = originalLine
+                                decodedMapping.OriginalColumn = originalColumn 
                             }
 
                             relativeNameIndex, err := DecodeBase64VLQ(segment, &position)
@@ -180,7 +186,7 @@ func DecodeMappings(mappings string, names []string, sources []*SourceRecord) ([
                                 return nil, fmt.Errorf("Error decoding base64 VLQ: %s", err.Error())
                             }
                             
-                            if relativeNameIndex != -1 {
+                            if relativeNameIndex != math.MaxInt {
                                 nameIndex += relativeNameIndex
                                 if nameIndex < 0 || nameIndex >= len(names) {
                                     slog.Error("Error: nameIndex < 0 or nameIndex >= len(names)", "nameIndex", nameIndex, "len(names)", len(names))
@@ -212,10 +218,10 @@ func ValidateBase64VLQGroupings(groupings string) error {
     return nil 
 }
 
-func DecodeBase64VLQ(segment string, position *uint) (int, error) {
+func DecodeBase64VLQ(segment string, position *int) (int, error) {
     segmentLen := len(segment)
     if int(*position) == segmentLen {
-        return -1, nil
+        return math.MaxInt, nil
     }
 
     first, err := ConsumeBase64ValueAt(segment, position)
@@ -243,7 +249,7 @@ func DecodeBase64VLQ(segment string, position *uint) (int, error) {
     currentByte := first
 
     for currentByte / 32 == 1 {
-        if *position == uint(segmentLen) {
+        if *position == segmentLen {
             return -1, fmt.Errorf("Error: position == segmentLen => %d == %d", *position, segmentLen)
         }
 
@@ -267,14 +273,13 @@ func DecodeBase64VLQ(segment string, position *uint) (int, error) {
     if value == 0 && sign == -1 {
         return -2147483648, nil
     }
-    
-    slog.Info("Returning from DecodeBase64VLQ", "segment", segment, "ret", sign * value)
+
     return sign * value, nil
 }
 
 // ConsumeBase64ValueAt attempts to base64 decode the char at position, and if successful returns the int value of the decoded char. 
 // Returns an error if position is out of bounds of str, or if the char at position is not a valid base64 char
-func ConsumeBase64ValueAt(str string, position *uint) (int, error) {
+func ConsumeBase64ValueAt(str string, position *int) (int, error) {
     alph := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
     if int(*position) >= len(str) {
