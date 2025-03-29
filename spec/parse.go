@@ -1,4 +1,4 @@
-// Package spec contains Objects and implementations of the abstract methods defined in [Draft ECMA-426].
+// Package spec contains types and implementations of the abstract methods defined in [Draft ECMA-426].
 //
 // [Draft ECMA-426]: https://tc39.es/ecma426/
 package spec
@@ -51,7 +51,7 @@ func ParseJSON(str string) (*SourceMap, error) {
     return sourceMap, nil
 }
 
-// DecodeSourceMap decodes sourceMap into a DecodedSourceMapRecord
+// DecodeSourceMap decodes sourceMap into a DecodedSourceMapRecord.
 //
 // [Source map format specification]
 //
@@ -79,7 +79,7 @@ func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRec
         Mappings: mappings,
     }, nil
 }
-// DecodeSourceMapSources
+// DecodeSourceMapSources decodes source map source information and returns a DecodedSourceRecord.
 //
 // [Source map format specification]
 //
@@ -124,7 +124,7 @@ func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string,
     return decodedSources, nil
 }
 
-// DecodeMappings 
+// DecodeMappings decodes mappings from a source map, and returns a slice of DecodedMappingRecords.
 // 
 // [Source map format specification]
 //
@@ -234,7 +234,8 @@ func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRec
     return decodedMappings, nil
 }
 
-// ValidateBase64VLQGroupings 
+// ValidateBase64VLQGroupings validates that all chars in groupings are valid base64VLQ chars.
+// Returns an error if any char in groupings is not a valid base64VLQ char.
 //
 // [Source map format specification]
 //
@@ -339,4 +340,4 @@ func ConsumeBase64ValueAt(str string, position *int) (int, error) {
 
     return chIndex, nil
 }
-    
+
