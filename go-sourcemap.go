@@ -66,7 +66,7 @@ func main() {
             os.Exit(-1)
         }
     } else {
-        decodedStr, err := tools.StringifyDecodedSourceMapRecord(decoded)
+        decodedStr, err := tools.MarshalDecodedSourceMapRecord(decoded)
 
         if err != nil {
             fmt.Printf("Error stringifying decodedStr: %v\n", err)

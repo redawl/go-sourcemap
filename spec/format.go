@@ -8,17 +8,17 @@ type SourceMap struct {
     File string             `json:"file"`                
     // SourceRoot is optional 
     SourceRoot string       `json:"sourceRoot"`          
-    // original mapped sources names
+    // Sources is the original mapped sources names
     Sources []string        `json:"sources"`             
-    // original mapped sources contents
+    // SourcesContent is the original mapped sources contents
     SourcesContent []string `json:"sourcesContent"`      
-    // optional, symbol names which can be used by mappings field
+    // Name is the optional symbol names which can be used by mappings field
     Names []string          `json:"names"`               
-    // Encoded mapping data
+    // Mappings is the encoded mapping data
     Mappings string         `json:"mappings"`            
-    // optional, list of indices that should be considered third-party code
+    // IgnoreList is an optional list of indices that should be considered third-party code
     IgnoreList []int        `json:"ignoreList"`          
-    // Deprecated, only checked if ignoreList is not present
+    // Deprecated: XGoogleIgnoreList is only checked if IgnoreList is not present
     XGoogleIgnoreList []int `json:"x_google_ignoreList"` 
 }
 
@@ -46,9 +46,11 @@ type DecodedMappingRecord struct {
 
 // DecodedSourceMapRecord represents a fully decoded source map record.
 type DecodedSourceMapRecord struct {
-    // File 
+    // File is a *optional* name of the compiled output i.e. *.map.js
     File string                      `json:"file"`
+    // Sources is the original source records
     Sources []*DecodedSourceRecord   `json:"sources"`
+    // Mappings is the symbol mappings from source records to compuled output map record
     Mappings []*DecodedMappingRecord `json:"mappings"`
 }
 

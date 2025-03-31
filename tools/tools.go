@@ -35,8 +35,8 @@ func ParseSourceMapFromUrl(url string) (*spec.DecodedSourceMapRecord, error) {
 
     return spec.ParseSourceMap(string(contents), url)
 }
-// ParseSourceMapFromFile
-// TODO: Docs
+// ParseSourceMapFromFile parses a source map file.
+// Returns an error if the file is unreadable, or the file is not a valid source map file.
 func ParseSourceMapFromFile(filename string) (*spec.DecodedSourceMapRecord, error) {
     contents, err := os.ReadFile(filename) 
 
@@ -77,9 +77,8 @@ func SaveSourcesToDirectory(mapRecord *spec.DecodedSourceMapRecord, dir string) 
 
     return nil
 }
-// StringifyDecodedSourceMapRecord
-// TODO: Docs
-func StringifyDecodedSourceMapRecord(mapRecord *spec.DecodedSourceMapRecord) (string, error) {
+// MarshalDecodedSourceMapRecord returns the JSON encoding of mapRecord
+func MarshalDecodedSourceMapRecord(mapRecord *spec.DecodedSourceMapRecord) (string, error) {
     str, err := json.Marshal(mapRecord)
 
     if err != nil {

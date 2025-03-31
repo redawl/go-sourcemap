@@ -61,7 +61,14 @@ func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRec
         slog.Warn("Version was not 3, parsing may fail", "version", sourceMap.Version)
     }
 
-    sources, err := DecodeSourceMapSources(baseURL, sourceMap.SourceRoot, sourceMap.Sources, sourceMap.SourcesContent, sourceMap.IgnoreList)
+    ignoreList := sourceMap.IgnoreList
+
+    if ignoreList == nil {
+        // Check deprecanted x_google_ignore_list if ignoreList is null
+        ignoreList = sourceMap.XGoogleIgnoreList
+    }
+
+    sources, err := DecodeSourceMapSources(baseURL, sourceMap.SourceRoot, sourceMap.Sources, sourceMap.SourcesContent, ignoreList)
 
     if err != nil {
         return nil, fmt.Errorf("Failed decoding source map sources: %w", err)
@@ -195,9 +202,19 @@ func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRec
                             originalLine += relativeOriginalLine
                             originalColumn += relativeOriginalColumn
                             
-                            // TODO: Docs says source, but that doesn't exist. Is this correct?
+                            // Docs say len(source) instead of len(sources), but source does not exist, and sources makes sense in this context
                             if sourceIndex < 0 || originalLine < 0 || originalColumn < 0 || sourceIndex >= len(sources) {
-                                 slog.Error("Error: an index was less than zero, or sourceIndex >= len(sources)", "sourceIndex", sourceIndex, "originalLine", originalLine, "originalColumn", originalColumn, "len(sources)", len(sources))
+                                 slog.Error(
+                                     "Error: an index was less than zero, or sourceIndex >= len(sources)", 
+                                     "sourceIndex", 
+                                     sourceIndex, 
+                                     "originalLine", 
+                                     originalLine, 
+                                     "originalColumn", 
+                                     originalColumn, 
+                                     "len(sources)", 
+                                     len(sources),
+                                 )
                             } else {
                                 decodedMapping.OriginalSource = sources[sourceIndex]
                                 decodedMapping.OriginalLine = originalLine
@@ -213,7 +230,13 @@ func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRec
                             if relativeNameIndex != math.MaxInt {
                                 nameIndex += relativeNameIndex
                                 if nameIndex < 0 || nameIndex >= len(names) {
-                                    slog.Error("Error: nameIndex < 0 or nameIndex >= len(names)", "nameIndex", nameIndex, "len(names)", len(names))
+                                    slog.Error(
+                                        "Error: nameIndex < 0 or nameIndex >= len(names)", 
+                                        "nameIndex", 
+                                        nameIndex, 
+                                        "len(names)", 
+                                        len(names),
+                                    )
                                 } else {
                                     decodedMapping.Name = names[nameIndex]
                                 }
