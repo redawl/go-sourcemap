@@ -23,7 +23,7 @@ func ParseSourceMap(str string, baseURL string) (*DecodedSourceMapRecord, error)
     sourceMap, err := ParseJSON(str)
 
     if err != nil {
-        return nil, fmt.Errorf("Error parsing str: %v", err)
+        return nil, fmt.Errorf("Error parsing str: %w", err)
     }
 
     // TODO: call DecodeIndexSourceMap(sourceMap, baseURL) here if "sections" exists
@@ -64,13 +64,13 @@ func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRec
     sources, err := DecodeSourceMapSources(baseURL, sourceMap.SourceRoot, sourceMap.Sources, sourceMap.SourcesContent, sourceMap.IgnoreList)
 
     if err != nil {
-        return nil, fmt.Errorf("Failed decoding source map sources: %v", err)
+        return nil, fmt.Errorf("Failed decoding source map sources: %w", err)
     }
 
     mappings, err := DecodeMappings(sourceMap.Mappings, sourceMap.Names, sources)
 
     if err != nil {
-        return nil, fmt.Errorf("Error decoding mappings: %v", err)
+        return nil, fmt.Errorf("Error decoding mappings: %w", err)
     }
 
     return &DecodedSourceMapRecord{
@@ -156,7 +156,7 @@ func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRec
                 relativeGeneratedColumn, err := DecodeBase64VLQ(segment, &position)
 
                 if err != nil {
-                    return nil, fmt.Errorf("Error decoding base64 VLQ: %v", err)
+                    return nil, fmt.Errorf("Error decoding base64 VLQ: %w", err)
                 } else {
                     generatedColumn += relativeGeneratedColumn
 
@@ -173,19 +173,19 @@ func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRec
                         relativeSourceIndex, err := DecodeBase64VLQ(segment, &position)
 
                         if err != nil {
-                            return nil, fmt.Errorf("Error decoding base64 VLQ: %v", err)
+                            return nil, fmt.Errorf("Error decoding base64 VLQ: %w", err)
                         }
 
                         relativeOriginalLine, err := DecodeBase64VLQ(segment, &position)
 
                         if err != nil {
-                            return nil, fmt.Errorf("Error decoding base64 VLQ: %v", err)
+                            return nil, fmt.Errorf("Error decoding base64 VLQ: %w", err)
                         }
 
                         relativeOriginalColumn, err := DecodeBase64VLQ(segment, &position)
 
                         if err != nil {
-                            return nil, fmt.Errorf("Error decoding base64 VLQ: %v", err)
+                            return nil, fmt.Errorf("Error decoding base64 VLQ: %w", err)
                         }
                         
                         if relativeOriginalColumn == math.MaxInt && relativeSourceIndex != math.MaxInt {
@@ -207,7 +207,7 @@ func DecodeMappings(mappings string, names []string, sources []*DecodedSourceRec
                             relativeNameIndex, err := DecodeBase64VLQ(segment, &position)
 
                             if err != nil {
-                                return nil, fmt.Errorf("Error decoding base64 VLQ: %v", err)
+                                return nil, fmt.Errorf("Error decoding base64 VLQ: %w", err)
                             }
                             
                             if relativeNameIndex != math.MaxInt {

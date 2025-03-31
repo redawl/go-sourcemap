@@ -30,7 +30,7 @@ func ParseSourceMapFromUrl(url string) (*spec.DecodedSourceMapRecord, error) {
     contents, err := io.ReadAll(response.Body)
 
     if err != nil {
-        return nil, fmt.Errorf("Error reading response body: %v", err)
+        return nil, fmt.Errorf("Error reading response body: %w", err)
     }
 
     return spec.ParseSourceMap(string(contents), url)
@@ -41,7 +41,7 @@ func ParseSourceMapFromFile(filename string) (*spec.DecodedSourceMapRecord, erro
     contents, err := os.ReadFile(filename) 
 
     if err != nil {
-        return nil, fmt.Errorf("Error reading contents of %s: %v", filename, err)
+        return nil, fmt.Errorf("Error reading contents of %s: %w", filename, err)
     }
 
     return spec.ParseSourceMap(string(contents), filename)
@@ -54,7 +54,7 @@ func SaveSourcesToDirectory(mapRecord *spec.DecodedSourceMapRecord, dir string) 
     err := os.MkdirAll(dir, 0700)
 
     if err != nil {
-        return fmt.Errorf("Error creating %s: %v", dir, err)
+        return fmt.Errorf("Error creating %s: %w", dir, err)
     }
 
     for _, source := range mapRecord.Sources {
@@ -64,13 +64,13 @@ func SaveSourcesToDirectory(mapRecord *spec.DecodedSourceMapRecord, dir string) 
             err = os.MkdirAll(dir + source.Url[:index], 0700)
 
             if err != nil {
-                return fmt.Errorf("Error creating %s: %v", dir + source.Url[:index], err)
+                return fmt.Errorf("Error creating %s: %w", dir + source.Url[:index], err)
             }
 
             err := os.WriteFile(dir + source.Url, []byte(source.Content), 0600)
 
             if err != nil {
-                return fmt.Errorf("Error writing file contents to %s: %v", dir + source.Url, err)
+                return fmt.Errorf("Error writing file contents to %s: %w", dir + source.Url, err)
             }
         }
     }
@@ -83,7 +83,7 @@ func StringifyDecodedSourceMapRecord(mapRecord *spec.DecodedSourceMapRecord) (st
     str, err := json.Marshal(mapRecord)
 
     if err != nil {
-        return "", fmt.Errorf("Error stringifying mapRecord: %v", err)
+        return "", fmt.Errorf("Error stringifying mapRecord: %w", err)
     }
 
     return string(str), nil
