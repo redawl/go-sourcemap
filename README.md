@@ -4,5 +4,13 @@
 
 go-sourcemap is a pure-go implementation of the [Source Map](https://tc39.es/ecma426/) specification.
 
-More docs to come...
-
+```bash
+user@workstation ~ $ go-sourcemap -h
+Usage of go-sourcemap:
+  -d string
+        Directory to save decoded source files. If not specified, decoded source map will be printed to stdout
+  -f string
+        path to location of sourcemap file
+  -u string
+        url to download from
+```
