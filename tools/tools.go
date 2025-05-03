@@ -33,7 +33,7 @@ func ParseSourceMapFromUrl(url string) (*spec.DecodedSourceMapRecord, error) {
         return nil, fmt.Errorf("Error reading response body: %w", err)
     }
 
-    return spec.ParseSourceMap(string(contents), url)
+    return spec.ParseSourceMap(string(contents), "")
 }
 // ParseSourceMapFromFile parses a source map file.
 // Returns an error if the file is unreadable, or the file is not a valid source map file.
@@ -61,16 +61,18 @@ func SaveSourcesToDirectory(mapRecord *spec.DecodedSourceMapRecord, dir string) 
         index := strings.LastIndexByte(source.Url, os.PathSeparator)
 
         if index != -1 {
-            err = os.MkdirAll(dir + source.Url[:index], 0700)
+            basePath := dir + "/" + source.Url[:index]
+            fullPath := basePath + source.Url[index:]
+            err = os.MkdirAll(basePath, 0700)
 
             if err != nil {
                 return fmt.Errorf("Error creating %s: %w", dir + source.Url[:index], err)
             }
 
-            err := os.WriteFile(dir + source.Url, []byte(source.Content), 0600)
+            err := os.WriteFile(fullPath, []byte(source.Content), 0600)
 
             if err != nil {
-                return fmt.Errorf("Error writing file contents to %s: %w", dir + source.Url, err)
+                return fmt.Errorf("Error writing file contents to %s: %w", fullPath, err)
             }
         }
     }
