@@ -6,11 +6,11 @@ import (
 )
 
 var benchmarkFiles = map[string]string{
-	"Tiny":   "test1.js.map",      // 348 bytes
-	"Small":  "test2.js.map",      // 459 bytes
-	"Medium": "jquery.min.map",    // 135 KB
+	"Tiny":   "test1.js.map",         // 348 bytes
+	"Small":  "test2.js.map",         // 459 bytes
+	"Medium": "jquery.min.map",       // 135 KB
 	"Large":  "angular-core.mjs.map", // 2.7 MB
-	"XLarge": "babylon.js.map",    // 18 MB
+	"XLarge": "babylon.js.map",       // 18 MB
 }
 
 func loadBenchmarkFile(filename string) string {
@@ -24,11 +24,11 @@ func loadBenchmarkFile(filename string) string {
 func BenchmarkParseSourceMap(b *testing.B) {
 	for name, filename := range benchmarkFiles {
 		contents := loadBenchmarkFile(filename)
-		
+
 		b.Run(name, func(b *testing.B) {
 			b.SetBytes(int64(len(contents)))
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := ParseSourceMap(contents, "")
 				if err != nil {
@@ -42,11 +42,11 @@ func BenchmarkParseSourceMap(b *testing.B) {
 func BenchmarkParseJSON(b *testing.B) {
 	for name, filename := range benchmarkFiles {
 		contents := loadBenchmarkFile(filename)
-		
+
 		b.Run(name, func(b *testing.B) {
 			b.SetBytes(int64(len(contents)))
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := ParseJSON(contents)
 				if err != nil {
@@ -64,10 +64,10 @@ func BenchmarkDecodeSourceMap(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		
+
 		b.Run(name, func(b *testing.B) {
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := DecodeSourceMap(sourceMap, "")
 				if err != nil {
@@ -85,15 +85,15 @@ func BenchmarkDecodeMappings(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		
+
 		sources, err := DecodeSourceMapSources("", sourceMap.SourceRoot, sourceMap.Sources, sourceMap.SourcesContent, sourceMap.IgnoreList)
 		if err != nil {
 			b.Fatal(err)
 		}
-		
+
 		b.Run(name, func(b *testing.B) {
 			b.ResetTimer()
-			
+
 			for i := 0; i < b.N; i++ {
 				_, err := DecodeMappings(sourceMap.Mappings, sourceMap.Names, sources)
 				if err != nil {
