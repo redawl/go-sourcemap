@@ -50,6 +50,6 @@ type DecodedSourceMapRecord struct {
 	File string `json:"file"`
 	// Sources is the original source records
 	Sources []*DecodedSourceRecord `json:"sources"`
-	// Mappings is the symbol mappings from source records to compuled output map record
+	// Mappings is the symbol mappings from source records to compiled output map record
 	Mappings []*DecodedMappingRecord `json:"mappings"`
 }

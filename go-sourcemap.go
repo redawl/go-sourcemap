@@ -8,13 +8,13 @@
 //	    -f
 //	        File to read the source map from. Cannot be specified at the same time as -u.
 //	    -d
-//	        Directory to save decoded source files. If not specifed the decoded source map will be printed to stdout.
+//	        Directory to save decoded source files. If not specified the decoded source map will be printed to stdout.
 package main
 
 import (
 	"flag"
 	"fmt"
-	"os"
+	"log"
 
 	"github.com/redawl/go-sourcemap/spec"
 	"github.com/redawl/go-sourcemap/tools"
@@ -36,13 +36,11 @@ func main() {
 	flag.Parse()
 
 	if args.url == "" && args.file == "" {
-		fmt.Println("Either -u or -f is required")
-		os.Exit(-1)
+		log.Fatalf("Either -u or -f is required")
 	}
 
 	if args.url != "" && args.file != "" {
-		fmt.Println("Cannot specify both -u and -f")
-		os.Exit(-1)
+		log.Fatalf("Cannot specify both -u and -f")
 	}
 
 	var decoded *spec.DecodedSourceMapRecord
@@ -55,23 +53,20 @@ func main() {
 	}
 
 	if err != nil {
-		fmt.Printf("Error parsing source map from %s: %v\n", args.url, err)
-		os.Exit(-1)
+		log.Fatalf("Error parsing source map from %s: %v\n", args.url, err)
 	}
 
 	if args.outDir != "" {
 		err := tools.SaveSourcesToDirectory(decoded, args.outDir)
 
 		if err != nil {
-			fmt.Printf("Error saving sources to %s: %v\n", args.outDir, err)
-			os.Exit(-1)
+			log.Fatalf("Error saving sources to %s: %v\n", args.outDir, err)
 		}
 	} else {
 		decodedStr, err := tools.MarshalDecodedSourceMapRecord(decoded)
 
 		if err != nil {
-			fmt.Printf("Error stringifying decodedStr: %v\n", err)
-			os.Exit(-1)
+			log.Fatalf("Error stringifying decodedStr: %v\n", err)
 		}
 
 		fmt.Println(decodedStr)

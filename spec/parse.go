@@ -13,7 +13,7 @@ import (
 )
 
 // ParseSourceMap parses str into a DecodedSourceMapRecord
-// Returns an error if parsing was not successfull
+// Returns an error if parsing was not successful
 // TODO: Support sourcemaps with the optional "sections" extension
 //
 // [Source map format specification]
@@ -23,7 +23,7 @@ func ParseSourceMap(str string, baseURL string) (*DecodedSourceMapRecord, error)
 	sourceMap, err := ParseJSON(str)
 
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing str: %w", err)
+		return nil, fmt.Errorf("parsing str: %w", err)
 	}
 
 	// TODO: call DecodeIndexSourceMap(sourceMap, baseURL) here if "sections" exists
@@ -42,9 +42,7 @@ func ParseJSON(str string) (*SourceMap, error) {
 
 	sourceMap := &SourceMap{}
 
-	err := decoder.Decode(sourceMap)
-
-	if err != nil {
+	if err := decoder.Decode(sourceMap); err != nil {
 		return nil, err
 	}
 
@@ -64,20 +62,20 @@ func DecodeSourceMap(sourceMap *SourceMap, baseURL string) (*DecodedSourceMapRec
 	ignoreList := sourceMap.IgnoreList
 
 	if ignoreList == nil {
-		// Check deprecanted x_google_ignore_list if ignoreList is null
+		// Check deprecated x_google_ignore_list if ignoreList is null
 		ignoreList = sourceMap.XGoogleIgnoreList
 	}
 
 	sources, err := DecodeSourceMapSources(baseURL, sourceMap.SourceRoot, sourceMap.Sources, sourceMap.SourcesContent, ignoreList)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed decoding source map sources: %w", err)
+		return nil, fmt.Errorf("decoding source map sources: %w", err)
 	}
 
 	mappings, err := DecodeMappings(sourceMap.Mappings, sourceMap.Names, sources)
 
 	if err != nil {
-		return nil, fmt.Errorf("Error decoding mappings: %w", err)
+		return nil, fmt.Errorf("decoding mappings: %w", err)
 	}
 
 	return &DecodedSourceMapRecord{
@@ -103,7 +101,7 @@ func DecodeSourceMapSources(baseURL string, sourceRoot string, sources []string,
 		if strings.Contains(sourceRoot, "/") {
 			idx := strings.Index(sourceRoot, "/")
 
-			sourceUrlPrefix = sourceRoot[0 : idx+1]
+			sourceUrlPrefix = sourceRoot[:idx+1]
 		} else {
 			sourceUrlPrefix = sourceRoot + "/"
 		}
