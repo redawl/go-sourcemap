@@ -4,8 +4,10 @@ package tools
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -74,6 +76,10 @@ func SaveSourcesToDirectory(mapRecord *spec.DecodedSourceMapRecord, dir string) 
 
 	for _, source := range mapRecord.Sources {
 		cleanedPath := trimPrefixAll(source.Url, "../")
+		if _, err := os.Stat(filepath.Join(dir, cleanedPath)); !errors.Is(err, os.ErrNotExist) {
+			log.Printf("Warning: file %s being overwritten\n", cleanedPath)
+		}
+
 		basePath := filepath.Dir(cleanedPath)
 
 		err := root.MkdirAll(basePath, 0o700)
